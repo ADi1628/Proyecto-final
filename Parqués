@@ -1,0 +1,82 @@
+import random
+import matplotlib.pyplot as plt
+import numpy as np
+
+class Parques:
+    def __init__(self):
+        self.tablero = [None] * 68  # Casillas numeradas
+        self.equipos = {"rojo": [], "azul": [], "verde": [], "amarillo": []}  # Equipos
+        self.carcel = {"rojo": 4, "azul": 4, "verde": 4, "amarillo": 4}  # Fichas en la cárcel
+        self.salidas = {"rojo": 5, "azul": 22, "verde": 39, "amarillo": 56}  # Posiciones de salida
+        self.llegada = {"rojo": [60, 61, 62, 63], "azul": [61, 62, 63, 64], "verde": [62, 63, 64, 65], "amarillo": [63, 64, 65, 66]}  # Posiciones de llegada
+        self.turno = ["rojo", "azul", "verde", "amarillo"]
+        self.dados = (1, 1)
+        self.recorrido_completo = {"rojo": [], "azul": [], "verde": [], "amarillo": []}  # Para fichas que han dado la vuelta completa
+
+    def lanzar_dados(self):
+        return random.randint(1, 6), random.randint(1, 6)
+
+    def jugar_turno(self, equipo):
+        input(f"Presiona Enter para que {equipo} lance los dados...")
+        dado1, dado2 = self.lanzar_dados()
+        print(f"{equipo} lanzó {dado1} y {dado2}")
+        
+        if dado1 == dado2:
+            print(f"{equipo} sacó par y pierde el turno")
+            return
+        
+        movimientos = [dado1 + dado2]
+        if 5 in (dado1, dado2, dado1 + dado2) and self.carcel[equipo] > 0:
+            self.carcel[equipo] -= 1
+            print(f"{equipo} sacó un 5 y libera una ficha de la cárcel")
+            self.equipos[equipo].append(self.salidas[equipo])
+            movimientos.append(0)
+        
+        fichas_a_mover = min(2, len(self.equipos[equipo]))
+        for i in range(fichas_a_mover):
+            if not movimientos:
+                break
+            ficha_a_mover = self.equipos[equipo][i]
+            nueva_posicion = (ficha_a_mover + movimientos.pop(0)) % 68
+            
+            if ficha_a_mover < self.salidas[equipo] and nueva_posicion >= self.salidas[equipo]:
+                self.recorrido_completo[equipo].append(ficha_a_mover)
+                
+            if ficha_a_mover in self.recorrido_completo[equipo] and nueva_posicion in self.llegada[equipo]:
+                print(f"Ficha de {equipo} ha llegado a la meta en {nueva_posicion}")
+                self.equipos[equipo][i] = nueva_posicion
+            else:
+                print(f"Ficha de {equipo} se mueve de {ficha_a_mover} a {nueva_posicion}")
+                self.equipos[equipo][i] = nueva_posicion
+        
+        if all(pos in self.llegada[equipo] for pos in self.equipos[equipo]) and len(self.equipos[equipo]) == 4:
+            print(f"El equipo {equipo} ha ganado el juego!")
+            exit()
+
+    def dibujar_tablero(self):
+        fig, ax = plt.subplots(figsize=(8, 8))
+        ax.set_xlim(0, 10)
+        ax.set_ylim(0, 10)
+        ax.set_xticks(np.arange(0, 11, 1))
+        ax.set_yticks(np.arange(0, 11, 1))
+        ax.grid(True, which='both', linestyle='--', linewidth=0.5)
+        colores = {"rojo": "red", "azul": "blue", "verde": "green", "amarillo": "yellow"}
+        
+        for equipo, fichas in self.equipos.items():
+            for ficha in fichas:
+                x = (ficha % 10) + 0.5
+                y = (ficha // 10) + 0.5
+                ax.scatter(x, y, c=colores[equipo], s=200)
+        
+        plt.show()
+
+    def iniciar_juego(self):
+        while True:
+            for equipo in self.turno:
+                self.jugar_turno(equipo)
+                self.dibujar_tablero()
+                input("Presiona Enter para continuar...")
+
+# Iniciar el juego
+ejuego = Parques()
+ejuego.iniciar_juego()
