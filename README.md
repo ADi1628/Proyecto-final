@@ -1,4 +1,4 @@
-Juego Parqués UN - Adriana Patricia Díaz Morales
+Juego Parqués U.N. - Adriana Patricia Díaz Morales
 
 El objetivo del juego es que cada equipo mueva sus fichas a través de un tablero de 68 casillas hasta alcanzar la zona de llegada. 
 Los jugadores avanzan según los valores obtenidos en los dados y deben seguir reglas específicas como liberar fichas de la cárcel, 
